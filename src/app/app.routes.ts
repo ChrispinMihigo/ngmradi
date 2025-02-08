@@ -1,16 +1,27 @@
 import { Routes } from '@angular/router';
 import { APP_NAME } from './app.constants';
 
+import {
+  canActivate,
+  redirectLoggedInTo,
+  redirectUnauthorizedTo,
+} from '@angular/fire/auth-guard';
+
+const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['login']);
+const redirectLoggedInToHome = () => redirectLoggedInTo(['']);
+
 export const routes: Routes = [
   {
     path: 'login',
     title: `Connexion - ${APP_NAME}`,
     loadComponent: () => import('./pages/login/login.component'),
+    ...canActivate(redirectLoggedInToHome),
   },
   {
     path: '',
     title: `${APP_NAME}`,
     loadComponent: () => import('./pages/home/home.component'),
+    ...canActivate(redirectUnauthorizedToLogin),
     children: [
       {
         path: 'projects',
@@ -53,6 +64,7 @@ export const routes: Routes = [
     path: 'project/:id',
     title: `Chargement du projet... - ${APP_NAME}`,
     loadComponent: () => import('./pages/projet/projet.component'),
+    ...canActivate(redirectUnauthorizedToLogin),
   },
   {
     path: '**',

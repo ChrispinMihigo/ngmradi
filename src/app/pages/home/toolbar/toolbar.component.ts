@@ -13,6 +13,8 @@ import {
 } from '../../../core/services/utilities/theme.service';
 import { StateService } from '../../../core/services/utilities/state.service';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../core/services/firebase/auth.service';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-toolbar',
@@ -23,6 +25,7 @@ import { Router } from '@angular/router';
     MatTooltipModule,
     MatMenuModule,
     MatDividerModule,
+    AsyncPipe,
   ],
   template: `
     <mat-toolbar>
@@ -43,7 +46,7 @@ import { Router } from '@angular/router';
 
         <img
           matTooltip="Profile"
-          src="assets/avatar.png"
+          [src]="(user$ | async)?.photoURL ?? 'assets/avatar.png'"
           alt="Avatar profil"
           width="32"
           height="32"
@@ -109,13 +112,16 @@ export class ToolbarComponent {
   viewport = inject(WindowsObserverService).width;
   ts = inject(ThemeService);
   state = inject(StateService);
+  auth = inject(AuthService);
+  user$ = this.auth.user;
   router = inject(Router);
 
   toggleDrawer = () => this.state.isToggleDrawer.update((value) => !value);
 
   switchTheme = (theme: ThemeMode) => this.ts.setTheme(theme);
 
-  logOut() {
-    this.router.navigate(['login']);
+  async logOut() {
+    await this.auth.logout();
+    this.router.navigate(['/login']);
   }
 }
